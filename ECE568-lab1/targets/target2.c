@@ -10,20 +10,9 @@ foo ( char *arg )
 
 	len = strlen(arg);
 	if (len > 272) len = 272;
-    char str[] = "\x90\x0c\x01\x00\x00\xe0\xfd\x21\x20\00";
-    int j = 0;
-	for (i = 0; i <= len; i++) {
-		//buf[i] = arg[i];
-        if (i > 259) printf("len %d\ti %d\t\n", len, i);
-        if (i >= 264) printf("buf %x\n", arg[i]);
-        if(i >=267)
-            buf[i] = str[j++];
-        else buf[i] = arg[i];
-        //else printf("\n");
+    for (i = 0; i <= len; i++) {
+    	buf[i] = arg[i];
     }
-    printf("len %d\ti %d\n", len, i);
-
-
 	return (0);
 }
 
