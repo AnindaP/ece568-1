@@ -3,7 +3,7 @@ CC := gcc
 RM := rm -f
 
 # flags
-CFLAGS := -ggdb
+CFLAGS := -ggdb -fno-stack-protector
 LDFLAGS :=
 LDLIBS :=
 
