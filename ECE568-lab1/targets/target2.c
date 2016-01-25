@@ -10,9 +10,9 @@ foo ( char *arg )
 
 	len = strlen(arg);
 	if (len > 272) len = 272;
-    for (i = 0; i <= len; i++) {
+        for (i = 0; i <= len; i++) {
     	buf[i] = arg[i];
-    }
+    }   
 	return (0);
 }
 
@@ -21,13 +21,13 @@ lab_main ( int argc, char *argv[] )
 {
 	int	t = 2;
 
-	//printf ("Target2 running.\n");
+	printf ("Target2 running.\n");
 
     //printf("lb %x\n", argv[1][267]);
 
 	if (argc != t)
 	{
-		//fprintf ( stderr, "target2: argc != 2\n" );
+		fprintf ( stderr, "target2: argc != 2\n" );
 		exit ( EXIT_FAILURE );
 	}
 

