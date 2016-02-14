@@ -25,7 +25,7 @@
 
 int http_serve (SSL *ssl, int s)
 {
-    char buf[255];
+    char buf[256];
     int r, len;
 }
 

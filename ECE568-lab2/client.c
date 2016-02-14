@@ -12,6 +12,10 @@
 #define HOST "localhost"
 #define PORT 8765
 
+/* Server */
+#define SERVER_HOST     "Bob's Server"
+#define SERVER_EMAIL    "ece568bob@ecf.utoronto.ca"
+
 /* use these strings to tell the marker what is happening */
 #define FMT_CONNECT_ERR "ECE568-CLIENT: SSL connect error\n"
 #define FMT_SERVER_INFO "ECE568-CLIENT: %s %s %s\n"
@@ -25,6 +29,42 @@
 #define CLIENT_CERT     "alice.pem"
 #define CA_CERT         "568ca.pem"
 
+int check_cert(SSL *ssl) 
+{
+    X509 *peer;
+    char peer_CN[256];
+    char peer_email[256];
+    char peer_issuer[256];
+
+    if(SSL_get_verify_result(ssl)!=X509_V_OK) {
+        printf(FMT_NO_VERIFY);
+        return -1;
+    }
+
+    /* Check the cert chain */
+    peer = SSL_get_peer_certificate(ssl);
+
+    /* Common Name */
+    X509_NAME_get_text_by_NID(X509_get_subject_name(peer), NID_commonName, peer_CN, 256);
+    if(strcasecmp(peer_CN, SERVER_HOST)){
+        printf(FMT_CN_MISMATCH);
+        return -1;
+    }
+
+    /* Email */
+    X509_NAME_get_text_by_NID(X509_get_subject_name(peer), NID_pkcs9_emailAddress, peer_email, 256);
+    if(strcasecmp(peer_email, SERVER_EMAIL)){
+        printf(FMT_EMAIL_MISMATCH);
+        return -1;
+    }
+
+    /* Issuer (for printing) */
+    X509_NAME_get_text_by_NID(X509_get_issuer_name(peer), NID_commonName, peer_issuer, 256);
+
+    printf(FMT_SERVER_INFO, peer_CN, peer_email, peer_issuer);
+    return 0;
+}
+
 int main(int argc, char **argv)
 {
   int len, sock, port=PORT;
@@ -33,6 +73,18 @@ int main(int argc, char **argv)
   struct hostent *host_entry;
   char buf[256];
   char *secret = "What's the question?";
+
+  /* SSL objects */
+  SSL_CTX * ctx;
+  BIO * sbio;
+  SSL * ssl; 
+  
+  /* SSL context */
+  ctx=initialize_ctx(CLIENT_KEY, "password");
+  /* Set sha1 cipher */
+  SSL_CTX_set_cipher_list(ctx, "SHA1"); 
+  /* Support SSLv3 and TLSv1 only */
+  SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2);
   
   /*Parse command line arguments*/
   
@@ -74,14 +126,31 @@ int main(int argc, char **argv)
     perror("socket");
   if(connect(sock,(struct sockaddr *)&addr, sizeof(addr))<0)
     perror("connect");
+
+  /* Connect the SSL socket */
+  ssl = SSL_new(ctx);
+  sbio = BIO_new_socket(sock, BIO_NOCLOSE);
+  SSL_set_bio(ssl,sbio,sbio);
+
+  /* SSL connection failure */
+  if (SSL_connect(ssl) < 0) {
+      //TODO destroy ctx, close sock, print err
+      close(sock);
+      return 1;
+  }
+
+  /* Check server cert */
+  if (!check_cert(ssl))
+      //TODO make request here
   
-  send(sock, secret, strlen(secret),0);
-  len = recv(sock, &buf, 255, 0);
-  buf[len]='\0';
+  /* send(sock, secret, strlen(secret),0); */
+  /* len = recv(sock, &buf, 255, 0); */
+  /* buf[len]='\0'; */
   
-  /* this is how you output something for the marker to pick up */
-  printf(FMT_OUTPUT, secret, buf);
+  /* /1* this is how you output something for the marker to pick up *1/ */
+  /* printf(FMT_OUTPUT, secret, buf); */
   
   close(sock);
   return 1;
+  //destroy ctx
 }
