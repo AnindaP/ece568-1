@@ -105,35 +105,36 @@ int main(int argc, char **argv)
     }
     else {
       /*Child code*/
-      /* int r; */
+      int r;
 
-      /* /1* Connect the SSL socket *1/ */
-      /* sbio = BIO_new_socket(s, BIO_NOCLOSE); */
-      /* ssl = SSL_new(ctx); */
-      /* SSL_set_bio(ssl,sbio,sbio); */
+      /* Connect the SSL socket */
+      sbio = BIO_new_socket(s, BIO_NOCLOSE);
+      ssl = SSL_new(ctx);
+      SSL_set_bio(ssl,sbio,sbio);
 
-      /* /1* Server SSL handshake *1/ */
-      /* if((r=SSL_accept(ssl)<=0)){ */
-      /*     /1* TODO print proper errors here *1/ */
-      /*     fprintf(stderr,"ssl err"); */
-      /* } */
+      /* Server SSL handshake */
+      if((r=SSL_accept(ssl)<=0)){
+          /* TODO print proper errors here */
+          fprintf(stderr,"ssl err");
+      }
 
-      /* http_serve(ssl, s); */
+      // TODO print certs and actually serve http request
+      http_serve(ssl, s);
 
-      int len;
-      char buf[256];
-      char *answer = "42";
+      /* int len; */
+      /* char buf[256]; */
+      /* char *answer = "42"; */
 
-      len = recv(s, &buf, 255, 0);
-      buf[len]= '\0';
-      printf(FMT_OUTPUT, buf, answer);
-      send(s, answer, strlen(answer), 0);
-      close(sock);
-      close(s);
-      return 0;
+      /* len = recv(s, &buf, 255, 0); */
+      /* buf[len]= '\0'; */
+      /* printf(FMT_OUTPUT, buf, answer); */
+      /* send(s, answer, strlen(answer), 0); */
+      /* close(sock); */
+      /* close(s); */
+      return 0; //also close ctx
     }
   }
   
   close(sock);
-  return 1;
+  return 1; //close ctx
 }
