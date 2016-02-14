@@ -7,6 +7,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include "util.h"
 
 #include <openssl/ssl.h>
 
@@ -22,46 +23,11 @@
 #define SERVER_CERT     "bob.pem"
 #define CA_CERT         "568ca.pem"
 
-int pem_passwd_cb(char *buf, int size, int rwflag, void *password)
+int http_serve (SSL *ssl, int s)
 {
-    strncpy(buf, (char *)(password), size);
-    buf[size - 1] = '\0';
-    return(strlen(buf));
+    char buf[255];
+    int r, len;
 }
-
-SSL_CTX *initialize_ctx (char *keyfile, char *password)
-{
-    SSL_METHOD *meth;
-    SSL_CTX *ctx;
-
-    /* Global system initialization */
-    SSL_library_init();
-    SSL_load_error_strings();
-    
-    /* Set up a SIGPIP handler */
-
-    /* Create server context with SSLv23 method, which can accept hello msgs
-     * from SSLv2, SSLv3 and TLSv1 */
-    meth = SSLv23_method(); 
-    ctx = SSL_CTX_new(meth);
-    
-    /* Load cert */
-    if (!(SSL_CTX_use_certificate_chain_file(ctx, keyfile)))
-	    fprintf(stderr,"can't read certificate file");
-
-    /* Set private key */
-    SSL_set_default_passwd_cb(ctx, pem_passwd_cb);
-    SSL_CTX_set_default_passwd_cb_userdata(ctx, (void *) password);
-    if (!(SSL_CTX_use_PrivateKey_file(ctx, keyfile, SSL_FILETYPE_PEM)))
-	    fprintf(stderr,"can't read key file");
-
-    /* Load CA */
-    if (!(SSL_CTX_load_verify_locations(ctx, CA_CERT, 0)))
-	    fprintf(stderr,"can't read CA list");
-
-    return ctx;
-}
-
 
 int main(int argc, char **argv)
 {
@@ -69,9 +35,20 @@ int main(int argc, char **argv)
   struct sockaddr_in sin;
   int val=1;
   pid_t pid;
+
+  /* SSL objects */
+  SSL_CTX * ctx;
+  BIO * sbio;
+  SSL * ssl; 
+  
+  /* SSL context */
+  ctx=initialize_ctx(SERVER_KEY, "password");
+  /* Support ciphers in SSLv2, SSLv3 and TLSv1 */
+  SSL_CTX_set_cipher_list(ctx, "SSLv2:SSLv3:TLSv1");
+  /* Only communicate if client has valid certs */
+  SSL_CTX_set_verify(ctx,SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT, 0);
   
   /*Parse command line arguments*/
-  
   switch(argc){
     case 1:
       break;
@@ -128,6 +105,21 @@ int main(int argc, char **argv)
     }
     else {
       /*Child code*/
+      /* int r; */
+
+      /* /1* Connect the SSL socket *1/ */
+      /* sbio = BIO_new_socket(s, BIO_NOCLOSE); */
+      /* ssl = SSL_new(ctx); */
+      /* SSL_set_bio(ssl,sbio,sbio); */
+
+      /* /1* Server SSL handshake *1/ */
+      /* if((r=SSL_accept(ssl)<=0)){ */
+      /*     /1* TODO print proper errors here *1/ */
+      /*     fprintf(stderr,"ssl err"); */
+      /* } */
+
+      /* http_serve(ssl, s); */
+
       int len;
       char buf[256];
       char *answer = "42";

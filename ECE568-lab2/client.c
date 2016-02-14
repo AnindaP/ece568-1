@@ -7,6 +7,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include "util.h"
 
 #define HOST "localhost"
 #define PORT 8765
@@ -19,6 +20,10 @@
 #define FMT_EMAIL_MISMATCH "ECE568-CLIENT: Server Email doesn't match\n"
 #define FMT_NO_VERIFY "ECE568-CLIENT: Certificate does not verify\n"
 #define FMT_INCORRECT_CLOSE "ECE568-CLIENT: Premature close\n"
+
+#define CLIENT_KEY      "alice.pem"
+#define CLIENT_CERT     "alice.pem"
+#define CA_CERT         "568ca.pem"
 
 int main(int argc, char **argv)
 {
