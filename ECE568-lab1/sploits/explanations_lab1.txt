@@ -1,5 +1,5 @@
 #Nayantara Prem, 998698351, tara.prem@mail.utoronto.ca
-#Tahia Khan, , tahia.khan@gmail.com
+#Tahia Khan, 998897216, tahia.khan@mail.utoronto.ca
 ______
 Sploit1
 This is a regular buffer overflow exploit. The vulnerability in target1 is in strcpy which is done without any bounds check. We pass in a buffer with the following structure:
@@ -9,7 +9,7 @@ This is a regular buffer overflow exploit. The vulnerability in target1 is in st
 This buffer copied into the address of 'buf' the stack frame of lab_main in target1. Since there is no bounds check on the buffer, strcpy will overwrite the contents of lab_main's return address with the start address of buf, which holds the shell code.
 _______
 Sploit2
-The vulnerability in this program is that target buffer (buf) is of size 256 but the buffer length check allows copying values upto a buffer length of 272.We exploit the fact that the copying of values into buffer is controlled by the for loop variables i and len which are local variable stored on the stack. As 272 is not quite a large enough value to be able to reach the address of the return value of foo, we instead use the 272 characters to overwrite len with a large enough value to be able to reach the address where the return address is stored on the stack while making sure i is also written with correct value to keep the loop looping(skipping over having to copy 0 into i because it already has a zero where expected). Due to the presence of 0 in the length, we pass in the return address as an environment variable.
+The vulnerability in this program is that target buffer is 256B but the program allows copying values upto 272B. We exploit the fact that this copying is controlled by the loop variables i and len which are local variables stored on the stack. As 272 is not large enough, we overwrite len with a large enough value to reach the address where the return address is stored and write i to continue looping. We pass in the return address as an environment variable.
 Buffer:
 [--NOPSLED--][-----SHELLCODE-----][--NOPSLED--][--i 267--][--len 283--]
 Env[1]:
@@ -21,4 +21,4 @@ Buf:
 [--NOPSLED--][-----SHELLCODE-----][--NOPSLED--][--RETURN ADDR 0x2021fe10--]
 _______
 Sploit4
-This exploit is similar to sploit2, except that the bounds check in target4 is more restrictive. Since it enforces a max length of 169, it's no longer possible to overwrite 'len' in the stack with a specific value since the copying of the buffer will terminate at the 169th iteration of the copying loop, after we reach the first byte of 'len' in the stack. Instead we just overwrite len with a large value to ensure that the loop doesn't terminate and then overwrite i with a value that is (len+20) so that the copying of the buf terminates at the 189th iteration. At this point the return address of foo will is overwritten with the start address of the buffer, which holds the shellcode. 
+This exploit is similar to sploit2, except now the bounds check enforces a max length of 169. Since the copying of the buffer will terminate at the 169th iteration of the copying loop, after we reach the first byte of 'len', we just overwrite len with a large value to ensure that the loop doesn't terminate and then overwrite i with a value that is (len+20) so that the copying of the buf terminates at the 189th iteration. At this point the return address of foo will is overwritten with the start address of the buffer, which holds the shellcode. 

