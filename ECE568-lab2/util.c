@@ -1,7 +1,5 @@
 #include "util.h"
 
-#include <openssl/ssl.h>
-
 int pem_passwd_cb(char *buf, int size, int rwflag, void *password)
 {
     strncpy(buf, (char *)(password), size);
@@ -40,4 +38,16 @@ SSL_CTX *initialize_ctx (char *keyfile, char *password)
 	    fprintf(stderr,"can't read CA list");
 
     return ctx;
+}
+
+void ssl_shutdown(SSL* ssl){
+  int r = SSL_shutdown(ssl);
+  switch(r){
+    case 1://success
+      break;
+    case 0:
+    case -1:
+    default:
+      printf("Shutdown failed\n");
+  }
 }

@@ -65,13 +65,66 @@ int check_cert(SSL *ssl)
     return 0;
 }
 
+void server_req_res(SSL* ssl, char* req){
+  int req_len = strlen(req);
+  int written_len = 0;
+
+  // sending request
+  written_len = SSL_write(ssl, req, req_len);
+  switch(SSL_get_error(ssl, written_len)){
+    case SSL_ERROR_SYSCALL:
+      printf(FMT_INCORRECT_CLOSE);
+      SSL_free(ssl);
+      return;
+    case SSL_ERROR_NONE:
+      if(req_len != written_len){
+         printf("Incomplete write"); 
+      }
+      break; 
+    case SSL_ERROR_ZERO_RETURN:
+      ssl_shutdown(ssl);
+      SSL_free(ssl);
+      return;
+    default:
+      printf("SSL write problem");
+      break;
+  }
+
+  // reading response
+  char buf[BUFSIZZ];
+  int r;
+  r = SSL_read(ssl, buf, BUFSIZZ);
+  switch(SSL_get_error(ssl, r)){
+    case SSL_ERROR_NONE:
+      break;
+    case SSL_ERROR_ZERO_RETURN:
+      ssl_shutdown(ssl);
+      SSL_free(ssl);
+      return;
+    case SSL_ERROR_SYSCALL:
+      printf(FMT_INCORRECT_CLOSE);
+      SSL_free(ssl);
+      return;
+    default:
+      printf("SSL read problem");
+      ssl_shutdown(ssl);
+      SSL_free(ssl);
+      return;
+  }
+  buf[r] = '\0';
+  printf(FMT_OUTPUT, req, buf);
+ 
+  ssl_shutdown(ssl);
+  SSL_free(ssl);
+  return;
+}
+
 int main(int argc, char **argv)
 {
-  int len, sock, port=PORT;
+  int sock, port=PORT;
   char *host=HOST;
   struct sockaddr_in addr;
   struct hostent *host_entry;
-  char buf[256];
   char *secret = "What's the question?";
 
   /* SSL objects */
@@ -133,24 +186,19 @@ int main(int argc, char **argv)
   SSL_set_bio(ssl,sbio,sbio);
 
   /* SSL connection failure */
-  if (SSL_connect(ssl) < 0) {
+  if (SSL_connect(ssl) <= 0) {
       //TODO destroy ctx, close sock, print err
+      printf(FMT_CONNECT_ERR);
+      SSL_CTX_free(ctx);
       close(sock);
       return 1;
   }
 
   /* Check server cert */
   if (!check_cert(ssl))
-      //TODO make request here
-  
-  /* send(sock, secret, strlen(secret),0); */
-  /* len = recv(sock, &buf, 255, 0); */
-  /* buf[len]='\0'; */
-  
-  /* /1* this is how you output something for the marker to pick up *1/ */
-  /* printf(FMT_OUTPUT, secret, buf); */
+      server_req_res(ssl, secret);
   
   close(sock);
+  SSL_CTX_free(ctx);
   return 1;
-  //destroy ctx
 }

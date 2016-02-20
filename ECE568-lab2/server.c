@@ -23,10 +23,86 @@
 #define SERVER_CERT     "bob.pem"
 #define CA_CERT         "568ca.pem"
 
-int http_serve (SSL *ssl, int s)
+
+int check_cert(SSL* ssl)
+{
+    X509 *peer = SSL_get_peer_certificate(ssl);
+    char peer_CN[256];
+    char peer_email[256];
+
+    if((SSL_get_verify_result(ssl)!=X509_V_OK)|| (!peer)) {
+        printf(FMT_ACCEPT_ERR);
+        ERR_print_errors_fp(stdout);
+        return -1;
+    }  
+
+    /* Common Name */
+    X509_NAME_get_text_by_NID(X509_get_subject_name(peer), NID_commonName, peer_CN, 256);
+
+    /* Email */
+    X509_NAME_get_text_by_NID(X509_get_subject_name(peer), NID_pkcs9_emailAddress, peer_email, 256);
+   
+    printf(FMT_CLIENT_INFO, peer_CN, peer_email);
+    return 0;
+     
+}
+
+void http_serve (SSL *ssl, int s, char* res)
 {
     char buf[256];
-    int r, len;
+    int r;
+
+    if(check_cert(ssl))
+      return;
+    
+    //read request
+    r = SSL_read(ssl, buf, BUFSIZZ);
+    switch(SSL_get_error(ssl, r)){
+      case SSL_ERROR_NONE:
+        break;
+      case SSL_ERROR_ZERO_RETURN:
+        ssl_shutdown(ssl);
+        SSL_free(ssl);
+        return;
+      case SSL_ERROR_SYSCALL:
+        printf(FMT_INCOMPLETE_CLOSE);
+        SSL_free(ssl);
+        return;
+      default:
+        printf("SSL read problem");
+        ssl_shutdown(ssl);
+        SSL_free(ssl);
+        return;
+    }
+    buf[r] = '\0';
+    printf(FMT_OUTPUT, buf, res);
+
+    // send response
+    int res_len = strlen(res);
+    int written_len = 0;
+
+    // sending request
+    written_len = SSL_write(ssl, res, res_len);
+    switch(SSL_get_error(ssl, written_len)){
+      case SSL_ERROR_SYSCALL:
+        printf(FMT_INCOMPLETE_CLOSE);
+        SSL_free(ssl);
+        return;
+      case SSL_ERROR_NONE:
+        if(res_len != written_len){
+           printf("Incomplete write"); 
+        }
+        break; 
+      case SSL_ERROR_ZERO_RETURN:
+        break;
+      default:
+        printf("SSL write problem");
+        break;
+    }
+
+    ssl_shutdown(ssl);
+    SSL_free(ssl);
+    return;   
 }
 
 int main(int argc, char **argv)
@@ -119,22 +195,15 @@ int main(int argc, char **argv)
       }
 
       // TODO print certs and actually serve http request
-      http_serve(ssl, s);
-
-      /* int len; */
-      /* char buf[256]; */
-      /* char *answer = "42"; */
-
-      /* len = recv(s, &buf, 255, 0); */
-      /* buf[len]= '\0'; */
-      /* printf(FMT_OUTPUT, buf, answer); */
-      /* send(s, answer, strlen(answer), 0); */
-      /* close(sock); */
-      /* close(s); */
-      return 0; //also close ctx
+      char *answer = "42";
+      http_serve(ssl, s, answer);
+  
+     close(sock);
+     close(s);
+     return 0;
     }
   }
-  
+  SSL_CTX_free(ctx);
   close(sock);
-  return 1; //close ctx
+  return 1;
 }
