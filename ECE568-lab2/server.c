@@ -61,7 +61,7 @@ void http_serve (SSL *ssl, int s, char* res)
       case SSL_ERROR_NONE:
         break;
       case SSL_ERROR_ZERO_RETURN:
-        ssl_shutdown(ssl);
+        ssl_shutdown(ssl, FMT_INCOMPLETE_CLOSE);
         SSL_free(ssl);
         return;
       case SSL_ERROR_SYSCALL:
@@ -70,7 +70,7 @@ void http_serve (SSL *ssl, int s, char* res)
         return;
       default:
         printf("SSL read problem");
-        ssl_shutdown(ssl);
+        ssl_shutdown(ssl, FMT_INCOMPLETE_CLOSE);
         SSL_free(ssl);
         return;
     }
@@ -100,7 +100,7 @@ void http_serve (SSL *ssl, int s, char* res)
         break;
     }
 
-    ssl_shutdown(ssl);
+    ssl_shutdown(ssl, FMT_INCOMPLETE_CLOSE);
     SSL_free(ssl);
     return;   
 }

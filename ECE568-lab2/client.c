@@ -82,7 +82,7 @@ void server_req_res(SSL* ssl, char* req){
       }
       break; 
     case SSL_ERROR_ZERO_RETURN:
-      ssl_shutdown(ssl);
+      ssl_shutdown(ssl, FMT_INCORRECT_CLOSE);
       SSL_free(ssl);
       return;
     default:
@@ -98,7 +98,7 @@ void server_req_res(SSL* ssl, char* req){
     case SSL_ERROR_NONE:
       break;
     case SSL_ERROR_ZERO_RETURN:
-      ssl_shutdown(ssl);
+      ssl_shutdown(ssl, FMT_INCORRECT_CLOSE);
       SSL_free(ssl);
       return;
     case SSL_ERROR_SYSCALL:
@@ -107,14 +107,14 @@ void server_req_res(SSL* ssl, char* req){
       return;
     default:
       printf("SSL read problem");
-      ssl_shutdown(ssl);
+      ssl_shutdown(ssl, FMT_INCORRECT_CLOSE);
       SSL_free(ssl);
       return;
   }
   buf[r] = '\0';
   printf(FMT_OUTPUT, req, buf);
  
-  ssl_shutdown(ssl);
+  ssl_shutdown(ssl, FMT_INCORRECT_CLOSE);
   SSL_free(ssl);
   return;
 }

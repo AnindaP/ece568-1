@@ -40,14 +40,20 @@ SSL_CTX *initialize_ctx (char *keyfile, char *password)
     return ctx;
 }
 
-void ssl_shutdown(SSL* ssl){
+void ssl_shutdown(SSL* ssl, char* error_string){
   int r = SSL_shutdown(ssl);
+  if(!r){
+	printf("Sending TCF FIN\n");
+        //shutdown(sock, 1);
+        r = SSL_shutdown(ssl);
+  }
+
   switch(r){
     case 1://success
       break;
     case 0:
     case -1:
     default:
-      printf("Shutdown failed\n");
+      printf(error_string);
   }
 }
