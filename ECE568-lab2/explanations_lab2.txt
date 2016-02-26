@@ -3,8 +3,7 @@
 
 client.c
 ===============================================================================
-First the client calls initialize_ctx() to set up the SSL context. It then sets SSL communication to SSLv3/TLSv1 and encryption to SHA1. Once a TCP connection is established (this code was left unchanged), the SSL handshake initiates and the client and server exchange and verify each other's key pair and CA. If this occurs successfully, the client calls check_cert() which verifies the common name and email of the server. If any errors are encountered during this process an error
-message is emitted and the connection is closed. Otherwise, the server_req_res() method handles the rest of the connection with calls to SSL_write() and then SSL_read(). Premature shutdown is handled in server_req_res() as well, which checks for various error cases using SSL_get_error(). In the end the SSL context is destroyed and the connection is closed.
+First the client calls initialize_ctx() to set up the SSL context. It then sets SSL communication to SSLv3/TLSv1 and encryption to SHA1. Once a TCP connection is established (this code was left unchanged), the SSL handshake initiates and the client and server exchange and verify each other's key pair and CA. If this occurs successfully, the client calls check_cert() which verifies the common name and email of the server. If any errors are encountered during this process an error message is emitted and the connection is closed. Otherwise, the server_req_res() method handles the rest of the connection with calls to SSL_write() and then SSL_read(). Premature shutdown is handled in server_req_res() as well, which checks for various error cases using SSL_get_error(). In the end the SSL context is destroyed and the connection is closed.
 
 server.c
 ===============================================================================
