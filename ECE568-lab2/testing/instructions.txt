@@ -1,0 +1,48 @@
+Reference
+===============================================================================
+http://www.flatmtn.com/article/creating-pkcs12-certificates
+http://www.flatmtn.com/article/setting-openssl-create-certificates
+
+
+Creating certs
+===============================================================================
+
+Create CA certs:
+openssl req -new -x509 -extensions v3_ca -keyout private/cakey.pem -out cacert.pem -days 365 -config ./openssl.cnf
+
+Create key and signing request:
+openssl req -new -nodes -out tahia-req.pem -keyout private/tahia-key.pem -days 365 -config ./openssl.cnf
+
+Sign certs:
+openssl ca -out tahia-cert.pem -days 365 -config ./openssl.cnf -infiles tahia-req.pem
+
+Make sure to append the client's private key at the bottom of its public cert. 
+
+
+Test cases
+===============================================================================
+
+Server output when client sends wrong CA [tested, client cert signed with different CA]:
+ECE568-SERVER: SSL accept error
+140657015334760:error:140890B2:SSL routines:SSL3_GET_CLIENT_CERTIFICATE:no certificate returned:s3_srvr.c:3288:
+
+Server output when client doesn't send a cert [tested, didn't pass a cert in client]:
+ECE568-SERVER: SSL accept error
+140657015334760:error:140890C7:SSL routines:SSL3_GET_CLIENT_CERTIFICATE:peer did not return a certificate:s3_srvr.c:3271:
+
+Server output when client does not shutdown correctly [tested, client returned early]:
+ECE568-SERVER: Incomplete shutdown
+
+Client output if server doesn't use SHA1 print:
+
+Client output if server doesn't use SSLv3 or TLSv1:
+
+Client output when CN is not correct:
+
+Client output when Email is not correct:
+
+Client output if certificate is not valid:
+
+Client output when server does not shutdown correctly [tested, server returned early]:
+ECE568-CLIENT: Premature close
+

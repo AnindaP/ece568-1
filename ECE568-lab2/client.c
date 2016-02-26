@@ -29,6 +29,10 @@
 #define CLIENT_CERT     "alice.pem"
 #define CA_CERT         "568ca.pem"
 
+//#define CLIENT_KEY      "testing/tahia-cert.pem"
+//#define CLIENT_CERT     "testing/tahia-cert.pem"
+//#define CA_CERT         "testing/cacert.pem"
+
 int check_cert(SSL *ssl) 
 {
     X509 *peer;
@@ -78,7 +82,7 @@ void server_req_res(SSL* ssl, char* req){
       return;
     case SSL_ERROR_NONE:
       if(req_len != written_len){
-         printf("Incomplete write"); 
+         printf(FMT_INCORRECT_CLOSE); 
       }
       break; 
     case SSL_ERROR_ZERO_RETURN:
@@ -86,7 +90,7 @@ void server_req_res(SSL* ssl, char* req){
       SSL_free(ssl);
       return;
     default:
-      printf("SSL write problem");
+      printf(FMT_INCORRECT_CLOSE); 
       break;
   }
 
@@ -106,7 +110,6 @@ void server_req_res(SSL* ssl, char* req){
       SSL_free(ssl);
       return;
     default:
-      printf("SSL read problem");
       ssl_shutdown(ssl, FMT_INCORRECT_CLOSE);
       SSL_free(ssl);
       return;
@@ -133,7 +136,8 @@ int main(int argc, char **argv)
   SSL * ssl; 
   
   /* SSL context */
-  ctx=initialize_ctx(CLIENT_KEY, "password");
+  //ctx=initialize_ctx(CLIENT_KEY, "password");
+  ctx=initialize_ctx(CLIENT_KEY, CA_CERT, "password");
   /* Set sha1 cipher */
   SSL_CTX_set_cipher_list(ctx, "SHA1"); 
   /* Support SSLv3 and TLSv1 only */

@@ -7,7 +7,7 @@ int pem_passwd_cb(char *buf, int size, int rwflag, void *password)
     return(strlen(buf));
 }
 
-SSL_CTX *initialize_ctx (char *keyfile, char *password)
+SSL_CTX *initialize_ctx (char *keyfile, char *cafile, char *password)
 {
     SSL_METHOD *meth;
     SSL_CTX *ctx;
@@ -34,7 +34,7 @@ SSL_CTX *initialize_ctx (char *keyfile, char *password)
 	    fprintf(stderr,"can't read key file");
 
     /* Load CA */
-    if (!(SSL_CTX_load_verify_locations(ctx, CA_CERT, 0)))
+    if (!(SSL_CTX_load_verify_locations(ctx, cafile, 0)))
 	    fprintf(stderr,"can't read CA list");
 
     return ctx;

@@ -23,7 +23,6 @@
 #define SERVER_CERT     "bob.pem"
 #define CA_CERT         "568ca.pem"
 
-
 int check_cert(SSL* ssl)
 {
     X509 *peer = SSL_get_peer_certificate(ssl);
@@ -32,7 +31,7 @@ int check_cert(SSL* ssl)
 
     if((SSL_get_verify_result(ssl)!=X509_V_OK)|| (!peer)) {
         printf(FMT_ACCEPT_ERR);
-        ERR_print_errors_fp(stdout);
+       // ERR_print_errors_fp(stdout);
         return -1;
     }  
 
@@ -118,7 +117,7 @@ int main(int argc, char **argv)
   SSL * ssl; 
   
   /* SSL context */
-  ctx=initialize_ctx(SERVER_KEY, "password");
+  ctx=initialize_ctx(SERVER_KEY, CA_CERT, "password");
   /* Support ciphers in SSLv2, SSLv3 and TLSv1 */
   SSL_CTX_set_cipher_list(ctx, "SSLv2:SSLv3:TLSv1");
   /* Only communicate if client has valid certs */
@@ -131,7 +130,8 @@ int main(int argc, char **argv)
     case 2:
       port=atoi(argv[1]);
       if (port<1||port>65535){
-	fprintf(stderr,"invalid port number");
+//TODO format error
+	fprintf(stderr,"invalid port number\n");
 	exit(0);
       }
       break;
@@ -191,7 +191,7 @@ int main(int argc, char **argv)
       /* Server SSL handshake */
       if((r=SSL_accept(ssl)<=0)){
           /* TODO print proper errors here */
-          fprintf(stderr,"ssl err");
+        printf(FMT_ACCEPT_ERR);
       }
 
       // TODO print certs and actually serve http request
