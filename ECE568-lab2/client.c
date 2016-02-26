@@ -29,10 +29,6 @@
 #define CLIENT_CERT     "alice.pem"
 #define CA_CERT         "568ca.pem"
 
-//#define CLIENT_KEY      "testing/tahia-cert.pem"
-//#define CLIENT_CERT     "testing/tahia-cert.pem"
-//#define CA_CERT         "testing/cacert.pem"
-
 int check_cert(SSL *ssl) 
 {
     X509 *peer;
