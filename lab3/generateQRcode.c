@@ -36,8 +36,13 @@ main(int argc, char * argv[])
 	// Create an otpauth:// URI and display a QR code that's compatible
 	// with Google Authenticator
 
+	// hotp
+	displayQRcode("otpauth://hotp/gibson?issuer=ECE568&secret=CI2FM6EQCI2FM6EQ&count=1");
+
+	// totp
 	displayQRcode("otpauth://totp/gibson?issuer=ECE568&secret=CI2FM6EQCI2FM6EQ&period=30");
 
 	return (0);
 }
 
+// TODO: functions that build otpauth strings after encoding/escaping accountname and issuer
