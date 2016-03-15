@@ -32,8 +32,6 @@ main(int argc, char * argv[])
 	
 	printf("\nIssuer: %s\nAccount Name: %s\nSecret (Hex): %s\n\n",
 		issuer, accountName, padded_secret_hex);
-	printf("Secret %s Encoded secret %s\n\n", secret_hex, padded_secret_hex);
-
 	char *encoded_accountName = urlEncode(accountName);
         char *encoded_issuer = urlEncode(issuer);
         char encoded_secret[20];
@@ -47,7 +45,7 @@ main(int argc, char * argv[])
 	displayQRcode(url);
 
 	// totp
-	snprintf(url, 200, "otpauth://totp/%s?issuer=%s&secret=%s&count=1", encoded_accountName, encoded_issuer, padded_secret_hex);
+	snprintf(url, 200, "otpauth://totp/%s?issuer=%s&secret=%s&period=30", encoded_accountName, encoded_issuer, padded_secret_hex);
 	displayQRcode(url);
 
 	return (0);
