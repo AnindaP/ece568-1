@@ -32,17 +32,24 @@ main(int argc, char * argv[])
 	
 	printf("\nIssuer: %s\nAccount Name: %s\nSecret (Hex): %s\n\n",
 		issuer, accountName, padded_secret_hex);
+	printf("Secret %s Encoded secret %s\n\n", secret_hex, padded_secret_hex);
 
+	char *encoded_accountName = urlEncode(accountName);
+        char *encoded_issuer = urlEncode(issuer);
+        char encoded_secret[20];
+	//Not a 100% sure what numerical parameters to pass into base32_encode
+	int l = base32_encode(secret_hex, 20, encoded_secret, 20);
 	// Create an otpauth:// URI and display a QR code that's compatible
 	// with Google Authenticator
-
+        char url[200];
 	// hotp
-	displayQRcode("otpauth://hotp/gibson?issuer=ECE568&secret=CI2FM6EQCI2FM6EQ&count=1");
+	snprintf(url, 200, "otpauth://hotp/%s?issuer=%s&secret=%s&count=1", encoded_accountName, encoded_issuer, padded_secret_hex);
+	displayQRcode(url);
 
 	// totp
-	displayQRcode("otpauth://totp/gibson?issuer=ECE568&secret=CI2FM6EQCI2FM6EQ&period=30");
+	snprintf(url, 200, "otpauth://totp/%s?issuer=%s&secret=%s&count=1", encoded_accountName, encoded_issuer, padded_secret_hex);
+	displayQRcode(url);
 
 	return (0);
 }
 
-// TODO: functions that build otpauth strings after encoding/escaping accountname and issuer
