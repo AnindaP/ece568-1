@@ -30,11 +30,10 @@ void prepend_zeros(char* str){
 	strcpy(str, temp);
 }
 
-uint8_t hexstr_to_hex(char h) {
-    if (h < 'A') 
-        return h - '0';
-    else
-        return h - 'A' + 10;
+uint8_t hexstr_to_hex(char c) {
+	if(c >= '0' && c <= '9') return c - '0';
+	if(c >= 'a' && c <= 'f') return c - 'a' + 10;
+	if(c >= 'A' && c <= 'F') return c - 'A' + 10;
 }
 
 static int 
@@ -53,7 +52,7 @@ validateOTP(char * secret_hex, uint8_t * data, char * HOTP_string)
     // bytes (two hex chars correspond to 1 uint8_t value)
     for (i = 0, j = 0; i < s_len; i+=2, j++) {
         key[j] = hexstr_to_hex(secret_hex[i]) * 16 + hexstr_to_hex(secret_hex[i + 1]);
-    }
+    
 
     /* The HMAC_SHA1 transform looks like: */
     /* SHA1(K XOR opad, SHA1(K XOR ipad, text)) */
