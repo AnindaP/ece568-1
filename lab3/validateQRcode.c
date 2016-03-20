@@ -31,46 +31,84 @@ void prepend_zeros(char* str){
 }
 
 
+
 static int
 validateHOTP(char * secret_hex, char * HOTP_string)
 {
-	int DIGITS_POWER[] = {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000};
+	int i, j;
+    uint8_t ipad[65]; /* inner padding - key XORd with ipad */
+    uint8_t opad[65]; /* outer padding - key XORd with opad */
+    uint8_t key[10];
+    SHA1_INFO ctx;
+
+
+    // Convert string of 20 hex characters to an array of 
+    // bytes (two hex chars correspond to 1 uint8_t value)
+    for (i = 0, j = 0; i < 20; i+=2, j++) {
+        key[j] = (secret_hex[i] - '0') * 16 + (secret_hex[i + 1] - '0');
+    }
+
+    /* The HMAC_SHA1 transform looks like: */
+    /* SHA1(K XOR opad, SHA1(K XOR ipad, text)) */
+    /* where K is an n byte key */
+    /* ipad is the byte 0x36 repeated 64 times */
+    /* opad is the byte 0x5c repeated 64 times */
+    /* and text is the data being protected */ 
+
+    memset(ipad, 0, sizeof(ipad));
+    memset(opad, 0, sizeof(opad));
+    memcpy(ipad, key, 10);
+    memcpy(opad, key, 10);
+
+    /* XOR key with ipad and opad values */
+    for (i = 0; i < 64; i++) {
+        ipad[i] ^= 0x36;
+        opad[i] ^= 0x5c;
+    }
+
+    // 8-byte counter array
 	long counter = 1;
-	int codeDigits = 6;
-	int i;
-	uint8_t sha[SHA1_DIGEST_LENGTH];
-	//Step1: generate 20B SHA-result
 	uint8_t text[sizeof(counter)];
-	printf("Secret hex: 0x");
-	for(i =0;i<strlen(secret_hex);i++)
-		printf("%x", secret_hex[i]);
-	printf("\nsizeof(counter) = %d, text=%d, secret_length=%d\n", sizeof(counter), sizeof(text),strlen(secret_hex));
-        for( i = sizeof(text)-1; i >= 0 ; i--){
+    for( i = sizeof(text)-1; i >= 0 ; i--){
 		text[i] = (char)(counter & 0xff);
 		counter >>= 8;
 	}
-	create_sha1(secret_hex,
-		text , sizeof(counter), sha);
 	
+    // Compute inner hash
+    uint8_t ihmac[SHA1_DIGEST_LENGTH];
+    sha1_init(&ctx);
+    sha1_update(&ctx, ipad, 64);
+    sha1_update(&ctx, text, sizeof(text));
+    sha1_final(&ctx, ihmac);
 
-	//Step2: extract 4B dynamic binary code from HMAC
+    // Compute inner hash
+    uint8_t hmac[SHA1_DIGEST_LENGTH];
+    sha1_init(&ctx);
+    sha1_update(&ctx, opad, 64);
+    sha1_update(&ctx, ihmac, SHA1_DIGEST_LENGTH);
+    sha1_final(&ctx, hmac);
 
-	int offset = sha[SHA1_DIGEST_LENGTH - 1] & 0x0f;
-	long binary = ((sha[offset] & 0x7f) << 24)
-		| ((sha[offset + 1] & 0xff) << 16)
-		| ((sha[offset + 2] & 0xff) << 8)
-		| ( sha[offset + 3] & 0xff);
-	printf("\nbinary = %li", binary);
+	// Extract 4B dynamic binary code from HMAC
+	int offset = hmac[SHA1_DIGEST_LENGTH - 1] & 0x0f;
+	long binary = ((hmac[offset] & 0x7f) << 24)
+		| ((hmac[offset + 1] & 0xff) << 16)
+		| ((hmac[offset + 2] & 0xff) << 8)
+		| ( hmac[offset + 3] & 0xff);
+
 	long otp = binary % 1000000;
-	printf("\notp = %li", otp);
 	char otp_str[7];
-	sprintf(otp_str, "%d", otp);
+	sprintf(otp_str, "%ld", otp);
 	while(strlen(otp_str) < 6)		
 		prepend_zeros(otp_str);
+
+	printf("\nbinary = %li", binary);
+	printf("\notp = %li", otp);
 	printf("\n calculated HOTP = %s", otp_str);
+
 	if(strcmp(HOTP_string, otp_str)==0)
 		return 1;
 	else return 0;
+
 }
 
 static int
