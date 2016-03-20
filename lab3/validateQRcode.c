@@ -30,20 +30,29 @@ void prepend_zeros(char* str){
 	strcpy(str, temp);
 }
 
+uint8_t hexstr_to_hex(char h) {
+    if (h < 'A') 
+        return h - '0';
+    else
+        return h - 'A' + 10;
+}
+
 static int 
 validateOTP(char * secret_hex, uint8_t * data, char * HOTP_string)
 {
 	int i, j;
     uint8_t ipad[65]; /* inner padding - key XORd with ipad */
     uint8_t opad[65]; /* outer padding - key XORd with opad */
-    uint8_t key[10];
+    int s_len = strlen(secret_hex);
+    int k_len = s_len/2;
+    uint8_t key[k_len];
     SHA1_INFO ctx;
 
 
     // Convert string of 20 hex characters to an array of 
     // bytes (two hex chars correspond to 1 uint8_t value)
-    for (i = 0, j = 0; i < 20; i+=2, j++) {
-        key[j] = (secret_hex[i] - '0') * 16 + (secret_hex[i + 1] - '0');
+    for (i = 0, j = 0; i < s_len; i+=2, j++) {
+        key[j] = hexstr_to_hex(secret_hex[i]) * 16 + hexstr_to_hex(secret_hex[i + 1]);
     }
 
     /* The HMAC_SHA1 transform looks like: */
@@ -55,8 +64,8 @@ validateOTP(char * secret_hex, uint8_t * data, char * HOTP_string)
 
     memset(ipad, 0, sizeof(ipad));
     memset(opad, 0, sizeof(opad));
-    memcpy(ipad, key, 10);
-    memcpy(opad, key, 10);
+    memcpy(ipad, key, k_len);
+    memcpy(opad, key, k_len);
 
     /* XOR key with ipad and opad values */
     for (i = 0; i < 64; i++) {
