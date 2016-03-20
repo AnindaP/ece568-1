@@ -30,10 +30,8 @@ void prepend_zeros(char* str){
 	strcpy(str, temp);
 }
 
-
-
-static int
-validateHOTP(char * secret_hex, char * HOTP_string)
+static int 
+validateOTP(char * secret_hex, uint8_t * data, char * HOTP_string)
 {
 	int i, j;
     uint8_t ipad[65]; /* inner padding - key XORd with ipad */
@@ -66,19 +64,12 @@ validateHOTP(char * secret_hex, char * HOTP_string)
         opad[i] ^= 0x5c;
     }
 
-    // 8-byte counter array
-	long counter = 1;
-	uint8_t text[sizeof(counter)];
-    for( i = sizeof(text)-1; i >= 0 ; i--){
-		text[i] = (char)(counter & 0xff);
-		counter >>= 8;
-	}
 	
     // Compute inner hash
     uint8_t ihmac[SHA1_DIGEST_LENGTH];
     sha1_init(&ctx);
     sha1_update(&ctx, ipad, 64);
-    sha1_update(&ctx, text, sizeof(text));
+    sha1_update(&ctx, data, sizeof(data));
     sha1_final(&ctx, ihmac);
 
     // Compute inner hash
@@ -111,10 +102,33 @@ validateHOTP(char * secret_hex, char * HOTP_string)
 
 }
 
+
+static int
+validateHOTP(char * secret_hex, char * HOTP_string)
+{
+    // 8-byte counter array
+    int i;
+	long counter = 1;
+	uint8_t text[sizeof(counter)];
+    for( i = sizeof(text)-1; i >= 0 ; i--){
+		text[i] = (char)(counter & 0xff);
+		counter >>= 8;
+	}
+    return validateOTP(secret_hex, text, HOTP_string);
+}
+
 static int
 validateTOTP(char * secret_hex, char * TOTP_string)
 {
-	return (0);
+    int t = ((int)time(NULL))/30; // period = 30
+
+    int i;
+    uint8_t timer[8]; 
+    for( i = 7; i >= 0 ; i--){
+        timer[i] = t & 0xff;
+        t >>= 8;
+    }
+    return validateOTP(secret_hex, timer, TOTP_string);
 }
 
 int
