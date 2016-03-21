@@ -1,0 +1,45 @@
+#Nayantara Prem, 998698351, tara.prem@mail.utoronto.ca
+#Tahia Khan, 998897216, tahia.khan@mail.utoronto.ca
+
+Part 1: generateQRCode.c
+===============================================================================
+
+
+
+Part 2: validateQRCode.c
+===============================================================================
+
+Validate HOTP:
+
+1)  Convert secret_hex, which is a string of 20 hex characters, to a byte 
+	array of size 10. 
+2)  To compute the HMAC, the following transformation must be performed:
+	SHA1(key XOR opad, SHA1(key XOR ipad, message))
+2a) Compute the block for the inner part of the digest by padding the key the full 
+	block length of 64 bytes, and then XOR'ing each byte with 0x36
+2b) Compute the block for the outer part of the digest by padding the key the full 
+	block length of 64 bytes, and then XOR'ing each byte with 0x5c
+3)  Compute the inner digest by concatenating the inner block with a counter (set to
+	1). The result is a 20 byte digest. 
+4)  Compute the outer digest by concatenating the outer block with the inner digest.
+	Convert this to a binary value. The first 6 digits are the final result.
+5)  Check for equality between the result and the given HOTP string.
+
+Validate TOTP:
+
+1)  Convert secret_hex, which is a string of 20 hex characters, to a byte 
+	array of size 10. 
+2)  To compute the HMAC, the following transformation must be performed:
+	SHA1(key XOR opad, SHA1(key XOR ipad, message))
+2a) Compute the block for the inner part of the digest by padding the key the full 
+	block length of 64 bytes, and then XOR'ing each byte with 0x36
+2b) Compute the block for the outer part of the digest by padding the key the full 
+	block length of 64 bytes, and then XOR'ing each byte with 0x5c
+3)  Compute the current time step (time()/30) and convert this value into an 8-byte 
+	array containing the binary value for the time step.
+3)  Compute the inner digest by concatenating the inner block with a time step byte
+	array. The result is a 20 byte digest. 
+4)  Compute the outer digest by concatenating the outer block with the inner digest.
+	Convert this to a binary value. The first 6 digits are the final result.
+5)  Check for equality between the result and the given TOTP string.
+
