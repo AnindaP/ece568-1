@@ -13,13 +13,6 @@ void create_sha1(char* secret_hex, uint8_t* text, int clen, uint8_t * sha){
 	sha1_update(&ctx, text, clen);
 	sha1_final(&ctx, sha);
         int i = 0;
-	printf("\n Text: ");
-        for(i =0;i<sizeof(text);i++)
-                printf("%d", text[i]);
-        printf("\nSHA: 0x");
-        for(i =0;i<SHA1_DIGEST_LENGTH;i++)
-                printf("%x", sha[i]);
-
  	return;
 }
 
@@ -36,7 +29,7 @@ uint8_t hexstr_to_hex(char c) {
 	if(c >= 'A' && c <= 'F') return c - 'A' + 10;
 }
 
-static int 
+int 
 validateOTP(char * secret_hex, uint8_t * data, char * HOTP_string)
 {
 	int i, j;
@@ -50,7 +43,7 @@ validateOTP(char * secret_hex, uint8_t * data, char * HOTP_string)
 
     // Convert string of 20 hex characters to an array of 
     // bytes (two hex chars correspond to 1 uint8_t value)
-    for (i = 0, j = 0; i < s_len; i+=2, j++) {
+    for (i = 0, j = 0; i < s_len; i+=2, j++) 
         key[j] = hexstr_to_hex(secret_hex[i]) * 16 + hexstr_to_hex(secret_hex[i + 1]);
     
 
@@ -100,10 +93,6 @@ validateOTP(char * secret_hex, uint8_t * data, char * HOTP_string)
 	while(strlen(otp_str) < 6)		
 		prepend_zeros(otp_str);
 
-	printf("\nbinary = %li", binary);
-	printf("\notp = %li", otp);
-	printf("\n calculated HOTP = %s", otp_str);
-
 	if(strcmp(HOTP_string, otp_str)==0)
 		return 1;
 	else return 0;
@@ -111,7 +100,7 @@ validateOTP(char * secret_hex, uint8_t * data, char * HOTP_string)
 }
 
 
-static int
+int
 validateHOTP(char * secret_hex, char * HOTP_string)
 {
     // 8-byte counter array
@@ -125,7 +114,7 @@ validateHOTP(char * secret_hex, char * HOTP_string)
     return validateOTP(secret_hex, text, HOTP_string);
 }
 
-static int
+int
 validateTOTP(char * secret_hex, char * TOTP_string)
 {
     int t = ((int)time(NULL))/30; // period = 30
