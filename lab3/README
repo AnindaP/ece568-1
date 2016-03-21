@@ -3,7 +3,13 @@
 
 Part 1: generateQRCode.c
 ===============================================================================
-
+To generate the QR code:
+1. Pad input hex secret to atlmost 20 characters if it's less that 20 
+2. Convert the input string into byte array
+3. Encode the array with base32 encoding
+4. Generate the url encoded values for the accountname and issuer
+5. Build the hotp and totp url strings with the above generated values
+6. Generate the 2 QR codes with the 2 strings 
 
 
 Part 2: validateQRCode.c
