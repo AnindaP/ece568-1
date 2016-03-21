@@ -56,22 +56,21 @@ main(int argc, char * argv[])
 		issuer, accountName, secret_hex);
         j = 0;
 	char padded_secret_hex[secret_hex_len/2];
-	gethex(secret_hex, padded_secret_hex);
+	
 	// Left-pad secret hex with zeros if its less than 20 hex characters
-	/*prelen = 20 - secret_hex_len;
+	prelen = 20 - secret_hex_len;
 	for (i = 0; i < prelen; i++)
 		padded_secret_hex[i] = '0';
 	for ( ; i < 20; i++) 
 		padded_secret_hex[i] = secret_hex[i - prelen];
   	padded_secret_hex[i] = '\0';
-        */
+	gethex(secret_hex, padded_secret_hex);
 	const char *encoded_accountName = urlEncode(accountName);
         const char *encoded_issuer = urlEncode(issuer);
         char encoded_secret[100];	// Store only 10 bytes of the base32 encoding so that we have an 80 bit secret
 
 	int l = base32_encode((const uint8_t *) padded_secret_hex, 10, (uint8_t *) encoded_secret, 100);
 	//encoded_secret[17] = '\0';
-        printf( "padded hex %s, len=%d\n", padded_secret_hex, strlen(padded_secret_hex));	
 	// Prepare buffers for hotp and totp uris 
 	hotp_len = 100;
 	totp_len = 100;
