@@ -64,7 +64,7 @@ main(int argc, char * argv[])
 	for ( ; i < 20; i++) 
 		padded_secret_hex[i] = secret_hex[i - prelen];
   	padded_secret_hex[i] = '\0';
-	gethex(secret_hex, padded_secret_hex);
+	gethex(padded_secret_hex, padded_secret_hex);
 	const char *encoded_accountName = urlEncode(accountName);
         const char *encoded_issuer = urlEncode(issuer);
         char encoded_secret[100];	// Store only 10 bytes of the base32 encoding so that we have an 80 bit secret
