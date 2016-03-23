@@ -1,0 +1,2 @@
+
+java ­jar webgoat.jar ­httpPort 8090

@@ -1,0 +1,12 @@
+Part 4: CSRF Prompt By-Pass
+===========================
+
+The exploitable field in this exercise is the Message field. The following img tag was inserted into the Message field:
+
+<img src="http://localhost:8080/WebGoat/attack?Screen=737&menu=900&transferFunds=5000#attack/737/900" height=1 width=1 />
+
+The difference between Part 3 is the addition of "#attack/737/900" in the url. This was found by following the URL http://localhost:8080/WebGoat/attack?Screen=737&menu=900&transferFunds=5000 and inspecting the form on the page.
+
+
+
+
