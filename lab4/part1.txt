@@ -1,3 +1,8 @@
+Part 1: Phishing with XSS
+=========================
+
+The code below is entered into the search field. This renders a form which includes an input field for username and password. When the 'login' button is pressed, the onclick() action calls the JavaScript function submit_phish(), which builds the target URL using user input from the form and redirects the current window to the target URL.
+
 </form>
 <script>
     function submist_phish() {
@@ -11,4 +16,3 @@
 </form>
 
 
-The above code is entered into the search field. This renders a form which includes an input field for username and password. When the 'login' button is pressed, the onclick() action calls the JavaScript function submit_phish(), which builds the target URL using user input from the form and redirects the current window to the target URL.

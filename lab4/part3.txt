@@ -1,0 +1,9 @@
+Part 3: Cross Site Request Forgery (CSRF)
+=========================================
+
+The exploitable field in this exercise is the Message field. The following img tag was inserted into the Message field:
+
+<img src="http://localhost:8080/WebGoat/attack?Screen=736&menu=900&transferFunds=5000" height=1 width=1 />
+
+The image tag includes the target URL in the src field. The url includes the transferFunds field which will transfer funds to the attacker if a victim is authenticated into their bank account's website at the time of clicking the link.
+
