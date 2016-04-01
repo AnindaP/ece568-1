@@ -1,0 +1,4 @@
+The  following was entered into the field:
+Smith' or 'all'='all
+
+Since second condition to the WHERE clause ('all' = 'all') is true, information for all users is displayed

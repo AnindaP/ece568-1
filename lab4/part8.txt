@@ -1,0 +1,11 @@
+First, we found a valid account number by guessing 101 ( from Part 7)
+Then the following input  to "Enter Account no." was constructed:
+101 and  (select count(*) from pins where cc_number=1111222233334444 and
+pins.pin >=0 and pins.pin <=100000)=1
+
+The pin number was determined by continually narrowing down our search by (like
+binary search) first guessing the pin would be somewhere between 0 and 100000,
+and since this was valid, reducing the upper bound and increasing the lower
+bound. If the pin is in the specified range, the output of the webapp shows
+that the account is valid.
+The correct pin value is 2364

