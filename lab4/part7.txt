@@ -1,3 +1,6 @@
+Part 7: Database Backdoors
+==========================
+
 Stage1:
 
 101; update employee set salary=100000 where userid=101

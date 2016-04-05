@@ -1,3 +1,6 @@
+Part 4: CSRF Token By-Pass
+==========================
+
 The following script and html is added to the exploitable 'message' field:
 
 <script>

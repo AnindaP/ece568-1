@@ -1,9 +1,9 @@
 Part 2: Reflected XSS Attacks
 =============================
 
-The exploitable field is "field1", i.e. the last input field with the label "Enter your three digit access code". The Hints tab on the page provided the following simple script:
+The exploitable field is "field1", i.e. the last input field with the label "Enter your three digit access code". This was discovered by inserting the following script into each form field:
 
-<SCRIPT>alert('bang!');</SCRIPT>
+<SCRIPT>alert(document.getElementsByName("field2")[0].value);</SCRIPT>
 
-This script was used to identify the exploitable field. 
+This script accesses the credit card number entered. A more complex script could post this information to an attacker's web site. 
 
